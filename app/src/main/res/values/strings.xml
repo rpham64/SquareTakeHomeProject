@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Square Take-Home Project</string>
+
+    <string name="empty_state_description">Oh no! We couldn\'t find any employees in your repository :(. Please try again later.</string>
+    <string name="error_state_description">Oh no! Something went wrong. Please try again later.</string>
+    <string name="retry">Retry</string>
 </resources>

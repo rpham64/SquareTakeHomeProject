@@ -5,10 +5,12 @@ import dagger.Module
 import dagger.Provides
 import retrofit2.Converter
 import retrofit2.Retrofit
+import javax.inject.Singleton
 
 @Module
 class NetworkModule {
 
+    @Singleton
     @Provides
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
@@ -16,6 +18,7 @@ class NetworkModule {
             .build()
     }
 
+    @Singleton
     @Provides
     fun provideSquareMobileInterviewRetrofitService(retrofit: Retrofit): EmployeeDirectoryRetrofitService {
         return retrofit.create(EmployeeDirectoryRetrofitService::class.java)

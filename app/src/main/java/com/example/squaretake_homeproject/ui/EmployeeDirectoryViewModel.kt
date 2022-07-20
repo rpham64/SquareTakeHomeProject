@@ -9,7 +9,9 @@ import com.example.squaretake_homeproject.data.model.Employee
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class EmployeeDirectoryViewModel @Inject constructor(
     private val employeeDirectoryRepository: EmployeeDirectoryRepository
 ) : ViewModel() {

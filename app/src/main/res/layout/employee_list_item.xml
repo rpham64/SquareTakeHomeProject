@@ -14,7 +14,7 @@
         app:layout_constraintTop_toTopOf="@id/employee_name"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="@id/employee_team_name"
-        tools:background="@mipmap/ic_launcher" />
+        android:src="@mipmap/ic_employee_picture_placeholder" />
 
     <androidx.appcompat.widget.AppCompatTextView
         android:id="@+id/employee_name"

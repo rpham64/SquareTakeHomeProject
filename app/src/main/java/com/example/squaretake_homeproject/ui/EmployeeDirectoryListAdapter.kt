@@ -11,7 +11,7 @@ import com.example.squaretake_homeproject.R
 import com.example.squaretake_homeproject.data.model.Employee
 
 class EmployeeDirectoryListAdapter(
-    private val employeesList: List<Employee>
+    var employeesList: List<Employee>
 ) : RecyclerView.Adapter<EmployeeDirectoryListAdapter.EmployeeDirectoryListViewHolder>() {
 
     class EmployeeDirectoryListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

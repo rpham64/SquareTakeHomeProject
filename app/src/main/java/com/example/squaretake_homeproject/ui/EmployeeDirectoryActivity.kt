@@ -1,8 +1,8 @@
 package com.example.squaretake_homeproject.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.example.squaretake_homeproject.EmployeeDirectoryApplication
 import com.example.squaretake_homeproject.R
 import com.example.squaretake_homeproject.data.model.Employee
@@ -11,23 +11,28 @@ import javax.inject.Inject
 
 class EmployeeDirectoryActivity : AppCompatActivity() {
 
-    @Inject lateinit var employeeDirectoryViewModel: EmployeeDirectoryViewModel
+    @Inject
+    lateinit var employeeDirectoryViewModel: EmployeeDirectoryViewModel
 
-    private lateinit var _binding: ActivityEmployeeDirectoryBinding
-    private val binding: ActivityEmployeeDirectoryBinding = _binding
+    private lateinit var binding: ActivityEmployeeDirectoryBinding
+
+    private val employeeListAdapter: EmployeeDirectoryListAdapter =
+        EmployeeDirectoryListAdapter(emptyList())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Inject app components
         (applicationContext as EmployeeDirectoryApplication).appComponent.inject(this)
 
         super.onCreate(savedInstanceState)
-        _binding = ActivityEmployeeDirectoryBinding.inflate(layoutInflater)
+        binding = ActivityEmployeeDirectoryBinding.inflate(layoutInflater)
         setContentView(R.layout.activity_employee_directory)
+
+        binding.viewContent.adapter = employeeListAdapter
 
         employeeDirectoryViewModel.results.observe(this) { result ->
             when {
                 result.isSuccess -> handleResult(result.getOrDefault(emptyList()))
-                result.isFailure -> showError()
+                else -> showError()
             }
         }
         employeeDirectoryViewModel.fetchEmployeesList()
@@ -35,10 +40,18 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
 
     private fun handleResult(employeesList: List<Employee>) {
         when {
-            employeesList.isNotEmpty() -> showContent()
+            employeesList.isNotEmpty() -> {
+                updateAdapter(employeesList)
+                showContent()
+            }
             employeesList.isEmpty() -> showEmpty()
             else -> showError()
         }
+    }
+
+    private fun updateAdapter(employeesList: List<Employee>) {
+        employeeListAdapter.employeesList = employeesList
+        binding.viewContent.adapter!!.notifyDataSetChanged()
     }
 
     private fun showContent() {

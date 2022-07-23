@@ -14,9 +14,12 @@ class DefaultEmployeeDirectoryRemoteDataSource @Inject constructor(
     private val service: EmployeeDirectoryRetrofitService
 ): EmployeeDirectoryRemoteDataSource {
 
-    override suspend fun getEmployeesList(): Result<List<Employee>> = service.getEmployeesList()
+    override suspend fun getEmployeesList(): Result<List<Employee>> =
+        kotlin.runCatching { service.getEmployeesList() }
 
-    override suspend fun getMalformedEmployeesList(): Result<List<Employee>> = service.getMalformedEmployeesList()
+    override suspend fun getMalformedEmployeesList(): Result<List<Employee>> =
+        kotlin.runCatching { service.getMalformedEmployeesList() }
 
-    override suspend fun getEmptyEmployeesList(): Result<List<Employee>> = service.getEmptyEmployeesList()
+    override suspend fun getEmptyEmployeesList(): Result<List<Employee>> =
+        kotlin.runCatching { service.getEmptyEmployeesList() }
 }

@@ -6,11 +6,11 @@ import retrofit2.http.GET
 interface EmployeeDirectoryRetrofitService {
 
     @GET("employees.json")
-    suspend fun getEmployeesList(): Result<List<Employee>>
+    suspend fun getEmployeesList(): List<Employee>
 
     @GET("employees_malformed.json")
-    suspend fun getMalformedEmployeesList(): Result<List<Employee>>
+    suspend fun getMalformedEmployeesList(): List<Employee>
 
     @GET("employees_empty.json")
-    suspend fun getEmptyEmployeesList(): Result<List<Employee>>
+    suspend fun getEmptyEmployeesList(): List<Employee>
 }

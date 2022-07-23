@@ -8,6 +8,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -23,9 +24,9 @@ class DefaultEmployeeDirectoryRemoteDataSourceTest {
     @Before
     fun setUp() {
         service = mock {
-            onBlocking { getEmployeesList() } doReturn Result.success(testEmployeesList)
-            onBlocking { getMalformedEmployeesList() } doReturn Result.failure(MalformedJsonException("Expected EOF"))
-            onBlocking { getEmptyEmployeesList() } doReturn Result.success(emptyList())
+            onBlocking { getEmployeesList() } doReturn testEmployeesList
+            onBlocking { getMalformedEmployeesList() } doAnswer { throw MalformedJsonException("Expected EOF") }
+            onBlocking { getEmptyEmployeesList() } doReturn emptyList()
         }
         remoteDataSource = DefaultEmployeeDirectoryRemoteDataSource(service)
     }
@@ -44,8 +45,8 @@ class DefaultEmployeeDirectoryRemoteDataSourceTest {
     @Test
     fun getEmployeesList_emptyList() {
         runTest {
-            val expectedResult = Result.success<List<Employee>>(emptyList())
-            whenever(service.getEmployeesList()).thenReturn(expectedResult)
+            val expectedResult = Result.success(emptyList<List<Employee>>())
+            whenever(service.getEmployeesList()).thenReturn(emptyList())
 
             val actual = remoteDataSource.getEmployeesList()
 
@@ -58,7 +59,7 @@ class DefaultEmployeeDirectoryRemoteDataSourceTest {
     fun getEmployeesList_failure() {
         runTest {
             val error = RuntimeException("error returned from backend")
-            whenever(service.getEmployeesList()).thenReturn(Result.failure(error))
+            whenever(service.getEmployeesList()).thenThrow(error)
 
             val actual = remoteDataSource.getEmployeesList()
 

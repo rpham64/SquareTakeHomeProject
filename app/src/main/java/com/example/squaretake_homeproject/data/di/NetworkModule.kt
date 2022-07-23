@@ -3,8 +3,8 @@ package com.example.squaretake_homeproject.data.di
 import com.example.squaretake_homeproject.data.source.remote.service.EmployeeDirectoryRetrofitService
 import dagger.Module
 import dagger.Provides
-import retrofit2.Converter
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
@@ -15,6 +15,7 @@ class NetworkModule {
     fun provideRetrofit(): Retrofit {
         return Retrofit.Builder()
             .baseUrl("https://s3.amazonaws.com/sq-mobile-interview/")
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 

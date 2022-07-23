@@ -130,14 +130,14 @@ class EmployeeDirectoryViewModelTest {
 
 private val testEmployeesList: List<Employee> = listOf(
     Employee(
-        uuid = UUID.randomUUID().toString(),
+        id = UUID.randomUUID().toString(),
         name = "Rudolf",
         phoneNumber = "4081234567",
         email = "testemail@gmail.com",
-        biography = "Hello my name is Rudolf",
+        summary = "Hello my name is Rudolf",
         photoSmall = "small photo",
         photoLarge = "large photo",
-        team = "team awesome",
+        teamName = "team awesome",
         employeeType = EmployeeType.FULL_TIME
     )
 )

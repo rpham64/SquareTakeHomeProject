@@ -35,7 +35,10 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
                 else -> showError()
             }
         }
-        employeeDirectoryViewModel.fetchEmployeesList()
+
+        if (savedInstanceState == null) {
+            employeeDirectoryViewModel.fetchEmployeesList()
+        }
     }
 
     private fun handleResult(employeesList: List<Employee>) {

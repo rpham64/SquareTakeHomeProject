@@ -2,6 +2,7 @@ package com.example.squaretake_homeproject.data.source.remote
 
 import android.util.MalformedJsonException
 import com.example.squaretake_homeproject.data.model.Employee
+import com.example.squaretake_homeproject.data.model.EmployeeListResult
 import com.example.squaretake_homeproject.data.model.EmployeeType
 import com.example.squaretake_homeproject.data.model.Response
 import com.example.squaretake_homeproject.data.source.remote.service.EmployeeDirectoryRetrofitService
@@ -35,10 +36,9 @@ class DefaultEmployeeDirectoryRemoteDataSourceTest {
     @Test
     fun getEmployeesList_success() {
         runTest {
-            val expectedResult = Result.success(testEmployeesList)
+            val expectedResult = EmployeeListResult.Success(testEmployeesList)
             val actual = remoteDataSource.getEmployeesList()
 
-            assert(actual.isSuccess)
             assert(actual == expectedResult)
         }
     }
@@ -46,12 +46,11 @@ class DefaultEmployeeDirectoryRemoteDataSourceTest {
     @Test
     fun getEmployeesList_emptyList() {
         runTest {
-            val expectedResult = Result.success(emptyList<List<Employee>>())
+            val expectedResult = EmployeeListResult.Success(emptyList())
             whenever(service.getEmployeesList()).thenReturn(Response(emptyList()))
 
             val actual = remoteDataSource.getEmployeesList()
 
-            assert(actual.isSuccess)
             assert(actual == expectedResult)
         }
     }
@@ -62,30 +61,32 @@ class DefaultEmployeeDirectoryRemoteDataSourceTest {
             val error = RuntimeException("error returned from backend")
             whenever(service.getEmployeesList()).thenThrow(error)
 
+            val expectedResult = EmployeeListResult.Error(error)
             val actual = remoteDataSource.getEmployeesList()
 
-            assert(actual.isFailure)
-            assert(actual.exceptionOrNull()!! == error)
+            assert(actual == expectedResult)
         }
     }
 
     @Test
     fun getMalformedEmployeesList() {
         runTest {
+            val expectedResult = EmployeeListResult.Error(MalformedJsonException("Expected EOF"))
             val actual = remoteDataSource.getMalformedEmployeesList()
 
-            assert(actual.isFailure)
-            assert(actual.exceptionOrNull()!! is MalformedJsonException)
+            assert(actual is EmployeeListResult.Error)
+
+            val errorResult: EmployeeListResult.Error = actual as EmployeeListResult.Error
+            assert(errorResult.error is MalformedJsonException)
         }
     }
 
     @Test
     fun getEmptyEmployeesList() {
         runTest {
-            val expectedResult = Result.success<List<Employee>>(emptyList())
+            val expectedResult = EmployeeListResult.Success(emptyList())
             val actual = remoteDataSource.getEmptyEmployeesList()
 
-            assert(actual.isSuccess)
             assert(actual == expectedResult)
         }
     }

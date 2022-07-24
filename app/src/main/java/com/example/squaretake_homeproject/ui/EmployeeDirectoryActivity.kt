@@ -1,11 +1,14 @@
 package com.example.squaretake_homeproject.ui
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.example.squaretake_homeproject.EmployeeDirectoryApplication
 import com.example.squaretake_homeproject.R
 import com.example.squaretake_homeproject.data.model.Employee
+import com.example.squaretake_homeproject.data.model.EmployeeListResult
 import com.example.squaretake_homeproject.databinding.ActivityEmployeeDirectoryBinding
 import javax.inject.Inject
 
@@ -25,14 +28,16 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
         binding = ActivityEmployeeDirectoryBinding.inflate(layoutInflater)
-        setContentView(R.layout.activity_employee_directory)
-
-        binding.viewContent.adapter = employeeListAdapter
+        binding.apply {
+            setContentView(root)
+            recyclerView.adapter = employeeListAdapter
+        }
 
         employeeDirectoryViewModel.results.observe(this) { result ->
-            when {
-                result.isSuccess -> handleResult(result.getOrDefault(emptyList()))
-                else -> showError()
+            when (result) {
+                is EmployeeListResult.Loading -> showLoading()
+                is EmployeeListResult.Success -> handleResult(result.employeesList)
+                is EmployeeListResult.Error -> showError()
             }
         }
 
@@ -41,25 +46,45 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
         }
     }
 
+    private fun showLoading() {
+        binding.apply {
+            loadingProgressBar.visibility = View.VISIBLE
+
+            // Hide all other views
+            recyclerView.visibility = View.GONE
+            viewError.visibility = View.GONE
+            viewEmpty.visibility = View.GONE
+        }
+    }
+
+    private fun hideLoading() {
+        binding.loadingProgressBar.visibility = View.GONE
+    }
+
     private fun handleResult(employeesList: List<Employee>) {
         when {
             employeesList.isNotEmpty() -> {
                 updateAdapter(employeesList)
                 showContent()
             }
-            employeesList.isEmpty() -> showEmpty()
+            employeesList.isEmpty() -> {
+                updateAdapter(employeesList)
+                showEmpty()
+            }
             else -> showError()
         }
+
+        hideLoading()
     }
 
     private fun updateAdapter(employeesList: List<Employee>) {
         employeeListAdapter.employeesList = employeesList
-        binding.viewContent.adapter!!.notifyDataSetChanged()
+        binding.recyclerView.adapter!!.notifyDataSetChanged()
     }
 
     private fun showContent() {
         binding.apply {
-            viewContent.visibility = View.VISIBLE
+            recyclerView.visibility = View.VISIBLE
             viewError.visibility = View.GONE
             viewEmpty.visibility = View.GONE
         }
@@ -67,7 +92,7 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
 
     private fun showError() {
         binding.apply {
-            viewContent.visibility = View.GONE
+            recyclerView.visibility = View.GONE
             viewError.visibility = View.VISIBLE
             viewEmpty.visibility = View.GONE
         }
@@ -75,7 +100,7 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
 
     private fun showEmpty() {
         binding.apply {
-            viewContent.visibility = View.GONE
+            recyclerView.visibility = View.GONE
             viewError.visibility = View.GONE
             viewEmpty.visibility = View.VISIBLE
         }

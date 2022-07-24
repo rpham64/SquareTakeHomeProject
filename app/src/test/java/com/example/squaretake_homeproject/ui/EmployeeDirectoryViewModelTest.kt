@@ -6,20 +6,21 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import com.example.squaretake_homeproject.data.EmployeeDirectoryRepository
 import com.example.squaretake_homeproject.data.model.Employee
+import com.example.squaretake_homeproject.data.model.EmployeeListResult
 import com.example.squaretake_homeproject.data.model.EmployeeType
+import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.yield
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import java.util.*
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class EmployeeDirectoryViewModelTest {
@@ -35,96 +36,121 @@ class EmployeeDirectoryViewModelTest {
     @Before
     fun setUp() {
         repository = mock()
-        ioDispatcher = UnconfinedTestDispatcher()
+        ioDispatcher = StandardTestDispatcher()
         viewModel = EmployeeDirectoryViewModel(repository, ioDispatcher)
     }
 
     @Test
     fun fetchEmployees_success() {
-        runTest {
-            whenever(repository.getEmployeesList()).thenReturn(Result.success(testEmployeesList))
+        runTest(ioDispatcher) {
+            val expectedResult = EmployeeListResult.Success(testEmployeesList)
+            whenever(repository.getEmployeesList()).thenReturn(expectedResult)
 
             viewModel.fetchEmployeesList()
 
-            val result = viewModel.results.getOrAwaitValue()
-            assert(result.isSuccess)
+            viewModel.results.observeForTesting {
+                // Yield test thread to let first livedata emission complete
+                yield()
 
-            val employeesList = result.getOrNull()!!
-            assert(employeesList.size == 1)
-            assert(employeesList == testEmployeesList)
+                // Check first value is Loading
+                assertEquals(EmployeeListResult.Loading, viewModel.results.value)
+
+                // Execute pending coroutines
+                advanceUntilIdle()
+
+                // Check second value is Success with non-empty employee list
+                assertEquals(expectedResult, viewModel.results.value)
+            }
         }
     }
 
     @Test
     fun fetchEmployees_empty() {
-        runTest {
-            whenever(repository.getEmployeesList()).thenReturn(Result.success(emptyList()))
+        runTest(ioDispatcher) {
+            val expectedResult = EmployeeListResult.Success(emptyList())
+            whenever(repository.getEmployeesList()).thenReturn(expectedResult)
 
             viewModel.fetchEmployeesList()
 
-            val result = viewModel.results.getOrAwaitValue()
-            assert(result.isSuccess)
+            viewModel.results.observeForTesting {
+                // Yield test thread to let first livedata emission complete
+                yield()
 
-            val employeesList = result.getOrNull()!!
-            assert(employeesList.isEmpty())
+                // Check first value is Loading
+                assertEquals(EmployeeListResult.Loading, viewModel.results.value)
+
+                // Execute pending coroutines
+                advanceUntilIdle()
+
+                // Check second value is Success with empty employee list
+                assertEquals(expectedResult, viewModel.results.value)
+            }
         }
     }
 
     @Test
     fun fetchEmployees_malformedEmployeesList() {
-        runTest {
+        runTest(ioDispatcher) {
             val malformedJsonException = MalformedJsonException("backend returned a malformed list")
-            whenever(repository.getEmployeesList()).thenReturn(Result.failure(malformedJsonException))
+            val expectedResult = EmployeeListResult.Error(malformedJsonException)
+            whenever(repository.getEmployeesList()).thenReturn(expectedResult)
 
             viewModel.fetchEmployeesList()
 
-            val result = viewModel.results.getOrAwaitValue()
-            assert(result.isFailure)
+            viewModel.results.observeForTesting {
+                // Yield test thread to let first livedata emission complete
+                yield()
+
+                // Check first value is Loading
+                assertEquals(EmployeeListResult.Loading, viewModel.results.value)
+
+                // Execute pending coroutines
+                advanceUntilIdle()
+
+                // Check second value is Error with MalformedJsonException
+                assertEquals(expectedResult, viewModel.results.value)
+            }
         }
     }
 
     @Test
     fun fetchEmployees_error() {
-        runTest {
+        runTest(ioDispatcher) {
             val error = Throwable("error returned from backend")
-            whenever(repository.getEmployeesList()).thenReturn(Result.failure(error))
+            val expectedResult = EmployeeListResult.Error(error)
+            whenever(repository.getEmployeesList()).thenReturn(expectedResult)
 
             viewModel.fetchEmployeesList()
 
-            val result = viewModel.results.getOrAwaitValue()
-            assert(result.isFailure)
+            viewModel.results.observeForTesting {
+                // Yield test thread to let first livedata emission complete
+                yield()
+
+                // Check first value is Loading
+                assertEquals(EmployeeListResult.Loading, viewModel.results.value)
+
+                // Execute pending coroutines
+                advanceUntilIdle()
+
+                // Check second value is Error with Throwable
+                assertEquals(expectedResult, viewModel.results.value)
+            }
         }
     }
 
     /**
-     * Taken from https://github.com/android/architecture-components-samples/blob/85587900b68a5d3a7edf95065fe2d8c768e66164/GithubBrowserSample/app/src/test-common/java/com/android/example/github/util/LiveDataTestUtil.kt#L32-L57
+     * Observes a [LiveData] until the `block` is done executing.
+     *
+     * Taken from https://github.com/android/architecture-components-samples/blob/master/LiveDataSample/app/src/test/java/com/android/example/livedatabuilder/util/LiveDataTestUtil.kt#L61-L68
      */
-    fun <T> LiveData<T>.getOrAwaitValue(
-        time: Long = 2,
-        timeUnit: TimeUnit = TimeUnit.SECONDS,
-        afterObserve: () -> Unit = {}
-    ): T {
-        var data: T? = null
-        val latch = CountDownLatch(1)
-        val observer = object : Observer<T> {
-            override fun onChanged(o: T?) {
-                data = o
-                latch.countDown()
-                this@getOrAwaitValue.removeObserver(this)
-            }
+    suspend fun <T> LiveData<T>.observeForTesting(block: suspend () -> Unit) {
+        val observer = Observer<T> { }
+        try {
+            observeForever(observer)
+            block()
+        } finally {
+            removeObserver(observer)
         }
-        this.observeForever(observer)
-
-        afterObserve.invoke()
-
-        // Don't wait indefinitely if the LiveData is not set.
-        if (!latch.await(time, timeUnit)) {
-            this.removeObserver(observer)
-            throw TimeoutException("LiveData value was never set.")
-        }
-
-        @Suppress("UNCHECKED_CAST")
-        return data as T
     }
 }
 

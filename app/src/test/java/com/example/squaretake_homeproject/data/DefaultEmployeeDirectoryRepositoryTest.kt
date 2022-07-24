@@ -2,6 +2,7 @@ package com.example.squaretake_homeproject.data
 
 import android.util.MalformedJsonException
 import com.example.squaretake_homeproject.data.model.Employee
+import com.example.squaretake_homeproject.data.model.EmployeeListResult
 import com.example.squaretake_homeproject.data.model.EmployeeType
 import com.example.squaretake_homeproject.data.source.remote.EmployeeDirectoryRemoteDataSource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,12 +29,11 @@ class DefaultEmployeeDirectoryRepositoryTest {
     @Test
     fun getEmployeesList_success() {
         runTest {
-            val expectedResult = Result.success(testEmployeesList)
+            val expectedResult = EmployeeListResult.Success(testEmployeesList)
             whenever(remoteDataSource.getEmployeesList()).thenReturn(expectedResult)
 
             val actual = repository.getEmployeesList()
 
-            assert(actual.isSuccess)
             assert(actual == expectedResult)
         }
     }
@@ -41,12 +41,11 @@ class DefaultEmployeeDirectoryRepositoryTest {
     @Test
     fun getEmployeesList_emptyList() {
         runTest {
-            val expectedResult = Result.success<List<Employee>>(emptyList())
+            val expectedResult = EmployeeListResult.Success(emptyList())
             whenever(remoteDataSource.getEmployeesList()).thenReturn(expectedResult)
 
             val actual = repository.getEmployeesList()
 
-            assert(actual.isSuccess)
             assert(actual == expectedResult)
         }
     }
@@ -55,12 +54,12 @@ class DefaultEmployeeDirectoryRepositoryTest {
     fun getEmployeesList_failure() {
         runTest {
             val error = Throwable("error returned from backend")
-            whenever(remoteDataSource.getEmployeesList()).thenReturn(Result.failure(error))
+            val expectedResult = EmployeeListResult.Error(error)
+            whenever(remoteDataSource.getEmployeesList()).thenReturn(expectedResult)
 
             val actual = repository.getEmployeesList()
 
-            assert(actual.isFailure)
-            assert(actual.exceptionOrNull()!! == error)
+            assert(actual == expectedResult)
         }
     }
 
@@ -68,24 +67,23 @@ class DefaultEmployeeDirectoryRepositoryTest {
     fun getMalformedEmployeesList() {
         runTest {
             val error = MalformedJsonException("Expected EOF at line 1")
-            whenever(remoteDataSource.getEmployeesList()).thenReturn(Result.failure(error))
+            val expectedResult = EmployeeListResult.Error(error)
+            whenever(remoteDataSource.getEmployeesList()).thenReturn(expectedResult)
 
             val actual = repository.getEmployeesList()
 
-            assert(actual.isFailure)
-            assert(actual.exceptionOrNull()!! == error)
+            assert(actual == expectedResult)
         }
     }
 
     @Test
     fun getEmptyEmployeesList() {
         runTest {
-            val expectedResult = Result.success<List<Employee>>(emptyList())
+            val expectedResult = EmployeeListResult.Success(emptyList())
             whenever(remoteDataSource.getEmptyEmployeesList()).thenReturn(expectedResult)
 
             val actual = repository.getEmptyEmployeesList()
 
-            assert(actual.isSuccess)
             assert(actual == expectedResult)
         }
     }

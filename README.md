@@ -52,7 +52,7 @@ Libraries:
 
 ## How long did you spend on this project?
 
-~6-7 hours
+~7-8 hours
 
 ## Did you make any trade-offs for this project? What would you have done differently with more time?
 

@@ -26,7 +26,7 @@ class EmployeeDirectoryListAdapter(
         fun bind(employee: Employee) {
             employee.apply {
                 Glide.with(itemView)
-                    .load(employee.photoSmall)
+                    .load(employee.photoLarge)
                     .placeholder(R.drawable.ic_employee_picture_placeholder)
                     .into(pictureView)
 

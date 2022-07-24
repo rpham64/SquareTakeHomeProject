@@ -77,4 +77,30 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
             viewEmpty.visibility = View.VISIBLE
         }
     }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.activity_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_refresh -> refresh()
+            R.id.action_show_empty -> getEmptyEmployeesList()
+            R.id.action_show_malformed_error -> getMalformedEmployeesList()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun refresh() {
+        employeeDirectoryViewModel.fetchEmployeesList()
+    }
+
+    private fun getEmptyEmployeesList() {
+        employeeDirectoryViewModel.fetchEmptyEmployeesList()
+    }
+
+    private fun getMalformedEmployeesList() {
+        employeeDirectoryViewModel.fetchMalformedEmployeesList()
+    }
 }

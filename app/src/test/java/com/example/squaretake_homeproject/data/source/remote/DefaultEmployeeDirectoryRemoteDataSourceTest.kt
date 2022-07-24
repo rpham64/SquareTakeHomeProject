@@ -3,6 +3,7 @@ package com.example.squaretake_homeproject.data.source.remote
 import android.util.MalformedJsonException
 import com.example.squaretake_homeproject.data.model.Employee
 import com.example.squaretake_homeproject.data.model.EmployeeType
+import com.example.squaretake_homeproject.data.model.Response
 import com.example.squaretake_homeproject.data.source.remote.service.EmployeeDirectoryRetrofitService
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -24,9 +25,9 @@ class DefaultEmployeeDirectoryRemoteDataSourceTest {
     @Before
     fun setUp() {
         service = mock {
-            onBlocking { getEmployeesList() } doReturn testEmployeesList
+            onBlocking { getEmployeesList() } doReturn testResponse
             onBlocking { getMalformedEmployeesList() } doAnswer { throw MalformedJsonException("Expected EOF") }
-            onBlocking { getEmptyEmployeesList() } doReturn emptyList()
+            onBlocking { getEmptyEmployeesList() } doReturn testResponse.copy(emptyList())
         }
         remoteDataSource = DefaultEmployeeDirectoryRemoteDataSource(service)
     }
@@ -46,7 +47,7 @@ class DefaultEmployeeDirectoryRemoteDataSourceTest {
     fun getEmployeesList_emptyList() {
         runTest {
             val expectedResult = Result.success(emptyList<List<Employee>>())
-            whenever(service.getEmployeesList()).thenReturn(emptyList())
+            whenever(service.getEmployeesList()).thenReturn(Response(emptyList()))
 
             val actual = remoteDataSource.getEmployeesList()
 
@@ -103,3 +104,5 @@ private val testEmployeesList: List<Employee> = listOf(
         employeeType = EmployeeType.FULL_TIME
     )
 )
+
+private val testResponse: Response = Response(testEmployeesList)

@@ -45,11 +45,15 @@ dependencies {
     def mockito_version = "4.6.1"
     def mockito_kotlin_version = "4.0.0"
     def retrofit_version = "2.9.0"
+    def swipe_refresh_layout_version = "1.1.0"
 
     implementation 'androidx.core:core-ktx:1.8.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // Swipe Refresh Layout
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:$swipe_refresh_layout_version"
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
@@ -57,7 +61,6 @@ dependencies {
 
     // Gson
     implementation "com.google.code.gson:gson:$gson_version"
-
 
     // Glide
     implementation "com.github.bumptech.glide:glide:$glide_version"

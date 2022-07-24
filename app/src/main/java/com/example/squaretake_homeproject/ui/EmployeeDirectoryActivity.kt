@@ -30,6 +30,12 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
         binding = ActivityEmployeeDirectoryBinding.inflate(layoutInflater)
         binding.apply {
             setContentView(root)
+            refreshLayout.setOnRefreshListener {
+                refresh()
+
+                // Hide refresh spinner since we're using the full screen loading spinner
+                refreshLayout.isRefreshing = false
+            }
             recyclerView.adapter = employeeListAdapter
         }
 
@@ -51,7 +57,7 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
             loadingProgressBar.visibility = View.VISIBLE
 
             // Hide all other views
-            recyclerView.visibility = View.GONE
+            refreshLayout.visibility = View.GONE
             viewError.visibility = View.GONE
             viewEmpty.visibility = View.GONE
         }
@@ -84,7 +90,7 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
 
     private fun showContent() {
         binding.apply {
-            recyclerView.visibility = View.VISIBLE
+            refreshLayout.visibility = View.VISIBLE
             viewError.visibility = View.GONE
             viewEmpty.visibility = View.GONE
         }
@@ -92,7 +98,7 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
 
     private fun showError() {
         binding.apply {
-            recyclerView.visibility = View.GONE
+            refreshLayout.visibility = View.GONE
             viewError.visibility = View.VISIBLE
             viewEmpty.visibility = View.GONE
         }
@@ -100,7 +106,7 @@ class EmployeeDirectoryActivity : AppCompatActivity() {
 
     private fun showEmpty() {
         binding.apply {
-            recyclerView.visibility = View.GONE
+            refreshLayout.visibility = View.GONE
             viewError.visibility = View.GONE
             viewEmpty.visibility = View.VISIBLE
         }

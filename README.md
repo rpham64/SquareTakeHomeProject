@@ -1,7 +1,5 @@
 ## Build tools & versions used
 
-Min SDK Version = 26 Target SDK Version = 32 Compile SDK Version = 32
-
 Gradle = 7.3.3
 
 Libraries:
@@ -77,3 +75,4 @@ Libraries:
     Source: https://github.com/android/architecture-components-samples/blob/master/LiveDataSample/app/src/test/java/com/android/example/livedatabuilder/util/LiveDataTestUtil.kt#L61-L68
 
 ## Is there any other information you’d like us to know?
+- To test and show the loading screen, I added a 2 second delay to show the loading spinner before the employee list is fetched and shown. This is because fetching the employee list from backend is very fast.

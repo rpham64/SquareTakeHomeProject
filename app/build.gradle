@@ -37,6 +37,7 @@ android {
 
 dependencies {
     def arch_version = "2.1.0"
+    def card_view_version = "1.0.0"
     def coroutines_version = "1.6.4"
     def dagger_version = "2.42"
     def glide_version = "4.13.2"
@@ -51,6 +52,9 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+
+    // Card View
+    implementation "androidx.cardview:cardview:$card_view_version"
 
     // Swipe Refresh Layout
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:$swipe_refresh_layout_version"
